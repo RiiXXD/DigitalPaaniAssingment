@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   InputGroup,
   Input,
@@ -9,18 +9,27 @@ import {
 import { FaSearchLocation } from "react-icons/fa";
 import { FaLocationCrosshairs } from "react-icons/fa6";
 
-const Search = () => {
-  const handleOnChange = (e) => {
-    const id=setTimeout(()=>{
-    fetchSearchResults(key);
-      },1000);
-     
-      return ()=>{
-        clearTimeout(id);
-      }
-    
+const Search = ({ onSearchChange }) => {
+  const [search, setSearch] = useState("");
+  const handleOnEnter = (evt) => {
+    if (evt.key === "Enter") {
+      handleSearch(evt);
     }
   };
+  const handleOnClick = (evt) => {
+    handleSearch(evt);
+  };
+  const handleSearch = (evt) => {
+    fetch(
+      `http://api.openweathermap.org/geo/1.0/direct?q=${search}&limit=1&appid=${process.env.REACT_APP_APIKEY}`
+    ).then(async (response) => {
+      const Response = await response.json();
+      console.log(Response[0].lat, Response[0].lon);
+      onSearchChange(Response[0].lat, Response[0].lon);
+    });
+    setSearch("");
+  };
+
   return (
     <Flex
       width={"100%"}
@@ -32,10 +41,17 @@ const Search = () => {
         <Input
           placeholder="Search for city,state,country"
           type="text"
-          onChange={(e) => handleOnChange(e)}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => handleOnEnter(e)}
         ></Input>
         <InputRightElement>
-          <FaSearchLocation />
+          <Button
+            onClick={(e) => {
+              handleOnClick(e);
+            }}
+          >
+            <FaSearchLocation />
+          </Button>
         </InputRightElement>
       </InputGroup>
       <Button>
