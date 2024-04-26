@@ -1,17 +1,13 @@
-import React from "react";
-import {
-  Container,
-  InputGroup,
-  Input,
-  InputRightElement,
-  Flex,
-  Heading,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import React, { useEffect, useRef, useState } from "react";
+import { Container, Flex, Heading, Text, VStack } from "@chakra-ui/react";
 import { CiLocationOn } from "react-icons/ci";
 import Search from "./Search";
 const Home = () => {
+  const [currentWeather, setCurrentWeather] = useState(null);
+  const [coordinates, setCoordinates] = useState(null);
+  const latitude = useRef(null);
+  const longitude = useRef(null);
+
   const dateBuilder = () => {
     const today = new Date();
     return today.toLocaleDateString(undefined, {
@@ -21,14 +17,17 @@ const Home = () => {
     });
   };
   const onSearchChange = async (lat, long) => {
-    console.log(lat, long, process.env.REACT_APP_BASEURL); // Getting Place
-    // fetch(
-    //   `${process.env.REACT_APP_BASEURL}weather?lat=${lat}&lon=${long}&units=metric&APPID=${process.env.REACT_APP_APIKEY}`
-    // ).then(async (response) => {
-    //   const weatherResponse = await response.json();
-    //   console.log(weatherResponse);
-    //   //   setCurrentWeather(weatherResponse);
-    // });
+    try {
+      fetch(
+        `${process.env.REACT_APP_BASEURL}weather?lat=${lat}&lon=${long}&units=metric&APPID=${process.env.REACT_APP_APIKEY}`
+      ).then(async (response) => {
+        const weatherResponse = await response.json();
+        console.log(weatherResponse);
+        setCurrentWeather(weatherResponse);
+      });
+    } catch (e) {
+      console.log(e);
+    }
 
     // fetch(
     //   `https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=hourly,minutely&units=metric&appid=49cc8c821cd2aff9af04c9f98c36eb74`
@@ -42,9 +41,36 @@ const Home = () => {
     // displayDiv.current.classList.add("show");
     // searchDiv.current.classList.remove("show");
   };
+  const getLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setCoordinates({ latitude, longitude });
+        },
+        (error) => {
+          console.error("Error getting location:", error.message);
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  };
+
+  useEffect(() => {
+    getLocation();
+  }, []);
+
+  useEffect(() => {
+    if (coordinates) {
+      const { latitude, longitude } = coordinates;
+      onSearchChange(latitude, longitude);
+    }
+  }, [coordinates]);
+
   return (
     <Container w="90%" minH="70vh" p="2em" bg="purple.100">
-      <Search onSearchChange={onSearchChange} />
+      <Search onSearchChange={onSearchChange} getLocation={getLocation} />
       <VStack
         spacing={3}
         mt="1em"
@@ -52,8 +78,12 @@ const Home = () => {
         textAlign={"center"}
         p="2em"
       >
-        <Heading>34 &#176;</Heading>
-        <Text>Haze</Text>
+        <Heading>
+          {currentWeather ? Math.round(currentWeather.main.temp) : "-"} &#176;C
+        </Heading>
+        <Text>
+          {currentWeather ? currentWeather.weather[0].description : "-"}
+        </Text>
         <Flex align={"center"} justify={"center"} gap={"10PX"}>
           <Text>Today •</Text>
 
@@ -61,7 +91,7 @@ const Home = () => {
         </Flex>
         <Flex align={"center"} justify={"center"} gap={"10PX"}>
           <CiLocationOn />
-          <Text>New Delhi</Text>
+          <Text>{currentWeather ? currentWeather.name : "New delhi"}</Text>
         </Flex>
       </VStack>
     </Container>

@@ -9,7 +9,7 @@ import {
 import { FaSearchLocation } from "react-icons/fa";
 import { FaLocationCrosshairs } from "react-icons/fa6";
 
-const Search = ({ onSearchChange }) => {
+const Search = ({ onSearchChange, getLocation }) => {
   const [search, setSearch] = useState("");
   const handleOnEnter = (evt) => {
     if (evt.key === "Enter") {
@@ -37,7 +37,7 @@ const Search = ({ onSearchChange }) => {
       justifyContent={"space-between"}
       alignItems={"center"}
     >
-      <InputGroup>
+      <InputGroup w={"85%"}>
         <Input
           placeholder="Search for city,state,country"
           type="text"
@@ -54,7 +54,7 @@ const Search = ({ onSearchChange }) => {
           </Button>
         </InputRightElement>
       </InputGroup>
-      <Button>
+      <Button onClick={getLocation}>
         <FaLocationCrosshairs />
       </Button>
     </Flex>
