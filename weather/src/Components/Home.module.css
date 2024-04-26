@@ -1,0 +1,11 @@
+.Home {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  /* background-image: url("../public/haze.jpg"); */
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-color: black;
+}

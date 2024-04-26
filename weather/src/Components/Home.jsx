@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Container, Flex, Heading, Text, VStack } from "@chakra-ui/react";
 import { CiLocationOn } from "react-icons/ci";
+import styles from "./Home.module.css";
 import Search from "./Search";
 const Home = () => {
   const [currentWeather, setCurrentWeather] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
-  const latitude = useRef(null);
-  const longitude = useRef(null);
+  const [backgroundImage, setBackgroundImage] = useState("default.jpg");
 
   const dateBuilder = () => {
     const today = new Date();
@@ -24,22 +24,23 @@ const Home = () => {
         const weatherResponse = await response.json();
         console.log(weatherResponse);
         setCurrentWeather(weatherResponse);
+        if (weatherResponse)
+          setBackgroundImage(
+            weatherResponse.weather[0].description.split(" ").join("")
+          );
+        const isRainy = /rain/i.test(weatherResponse.weather[0].description);
+        const isClear = /clear/i.test(weatherResponse.weather[0].description);
+        console.log(isClear);
+        if (isRainy) {
+          setBackgroundImage("rain");
+        } else if (isClear) {
+          setBackgroundImage("clear");
+          console.log("here");
+        }
       });
     } catch (e) {
       console.log(e);
     }
-
-    // fetch(
-    //   `https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=hourly,minutely&units=metric&appid=49cc8c821cd2aff9af04c9f98c36eb74`
-    // ).then(async (response) => {
-    //   const foreCastResponse = await response.json();
-    //   setCurrentForecast(foreCastResponse);
-    // });
-
-    // // Switching Displays
-
-    // displayDiv.current.classList.add("show");
-    // searchDiv.current.classList.remove("show");
   };
   const getLocation = () => {
     if (navigator.geolocation) {
@@ -56,7 +57,6 @@ const Home = () => {
       console.error("Geolocation is not supported by this browser.");
     }
   };
-
   useEffect(() => {
     getLocation();
   }, []);
@@ -69,32 +69,39 @@ const Home = () => {
   }, [coordinates]);
 
   return (
-    <Container w="90%" minH="70vh" p="2em" bg="purple.100">
-      <Search onSearchChange={onSearchChange} getLocation={getLocation} />
-      <VStack
-        spacing={3}
-        mt="1em"
-        bg="rgba(173, 216, 230, 0.4)"
-        textAlign={"center"}
-        p="2em"
-      >
-        <Heading>
-          {currentWeather ? Math.round(currentWeather.main.temp) : "-"} &#176;C
-        </Heading>
-        <Text>
-          {currentWeather ? currentWeather.weather[0].description : "-"}
-        </Text>
-        <Flex align={"center"} justify={"center"} gap={"10PX"}>
-          <Text>Today •</Text>
+    <div
+      className={styles.Home}
+      style={{ backgroundImage: `url("${backgroundImage}.jpg")` }}
+    >
+      <Container w="90%" minH="70vh" p="2em">
+        <Search onSearchChange={onSearchChange} getLocation={getLocation} />
+        <VStack
+          spacing={3}
+          mt="1em"
+          bg="rgba(173, 216, 230, 0.4)"
+          textAlign={"center"}
+          p="2em"
+          borderRadius={"20px"}
+        >
+          <Heading>
+            {currentWeather ? Math.round(currentWeather.main.temp) : "-"}{" "}
+            &#176;C
+          </Heading>
+          <Text>
+            {currentWeather ? currentWeather.weather[0].description : "-"}
+          </Text>
+          <Flex align={"center"} justify={"center"} gap={"10PX"}>
+            <Text>Today •</Text>
 
-          <Text>{dateBuilder()}</Text>
-        </Flex>
-        <Flex align={"center"} justify={"center"} gap={"10PX"}>
-          <CiLocationOn />
-          <Text>{currentWeather ? currentWeather.name : "New delhi"}</Text>
-        </Flex>
-      </VStack>
-    </Container>
+            <Text>{dateBuilder()}</Text>
+          </Flex>
+          <Flex align={"center"} justify={"center"} gap={"10PX"}>
+            <CiLocationOn />
+            <Text>{currentWeather ? currentWeather.name : "New delhi"}</Text>
+          </Flex>
+        </VStack>
+      </Container>
+    </div>
   );
 };
 
