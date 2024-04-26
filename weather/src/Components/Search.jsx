@@ -21,7 +21,7 @@ const Search = ({ onSearchChange, getLocation, setIsError }) => {
   };
   const handleSearch = (evt) => {
     fetch(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${search}&limit=1&appid=${process.env.REACT_APP_APIKEY}`
+      `https://api.openweathermap.org/geo/1.0/direct?q=${search}&limit=1&appid=${process.env.REACT_APP_APIKEY}`
     )
       .then(async (response) => {
         if (!response.ok) {
