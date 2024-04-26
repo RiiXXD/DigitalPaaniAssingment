@@ -9,7 +9,7 @@ import {
 import { FaSearchLocation } from "react-icons/fa";
 import { FaLocationCrosshairs } from "react-icons/fa6";
 
-const Search = ({ onSearchChange, getLocation }) => {
+const Search = ({ onSearchChange, getLocation, setIsError }) => {
   const [search, setSearch] = useState("");
   const handleOnEnter = (evt) => {
     if (evt.key === "Enter") {
@@ -22,12 +22,21 @@ const Search = ({ onSearchChange, getLocation }) => {
   const handleSearch = (evt) => {
     fetch(
       `http://api.openweathermap.org/geo/1.0/direct?q=${search}&limit=1&appid=${process.env.REACT_APP_APIKEY}`
-    ).then(async (response) => {
-      const Response = await response.json();
-      console.log(Response[0].lat, Response[0].lon);
-      onSearchChange(Response[0].lat, Response[0].lon);
-    });
-    setSearch("");
+    )
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        const Response = await response.json();
+        console.log(Response[0].lat, Response[0].lon);
+        onSearchChange(Response[0].lat, Response[0].lon);
+        setSearch("");
+        setIsError(false);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setIsError(true);
+      });
   };
 
   return (

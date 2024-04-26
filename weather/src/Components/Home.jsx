@@ -15,6 +15,7 @@ const Home = () => {
   const [currentWeather, setCurrentWeather] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
   const [backgroundImage, setBackgroundImage] = useState("default");
+  const [isError, setIsError] = useState(false);
 
   const dateBuilder = () => {
     const today = new Date();
@@ -25,31 +26,36 @@ const Home = () => {
     });
   };
   const onSearchChange = async (lat, long) => {
-    try {
-      fetch(
-        `${process.env.REACT_APP_BASEURL}weather?lat=${lat}&lon=${long}&units=metric&APPID=${process.env.REACT_APP_APIKEY}`
-      ).then(async (response) => {
+    fetch(
+      `${process.env.REACT_APP_BASEURL}weather?lat=${lat}&lon=${long}&units=metric&APPID=${process.env.REACT_APP_APIKEY}`
+    )
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch weather data");
+        }
         const weatherResponse = await response.json();
         console.log(weatherResponse);
         setCurrentWeather(weatherResponse);
-        if (weatherResponse)
+        if (weatherResponse) {
           setBackgroundImage(
             weatherResponse.weather[0].description.split(" ").join("")
           );
-        const isRainy = /rain/i.test(weatherResponse.weather[0].description);
-        const isClear = /clear/i.test(weatherResponse.weather[0].description);
-        console.log(isClear);
-        if (isRainy) {
-          setBackgroundImage("rain");
-        } else if (isClear) {
-          setBackgroundImage("clear");
-          console.log("here");
+          const isRainy = /rain/i.test(weatherResponse.weather[0].description);
+          const isClear = /clear/i.test(weatherResponse.weather[0].description);
+          if (isRainy) {
+            setBackgroundImage("rain");
+          } else if (isClear) {
+            setBackgroundImage("clear");
+            console.log("here");
+          }
         }
+      })
+      .catch((error) => {
+        console.error("Error fetching weather data:", error);
+        window.location.reload();
       });
-    } catch (e) {
-      console.log(e);
-    }
   };
+
   const getLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -90,7 +96,12 @@ const Home = () => {
         p="2em"
         fontFamily="Raleway, sans-serif"
       >
-        <Search onSearchChange={onSearchChange} getLocation={getLocation} />
+        <Search
+          onSearchChange={onSearchChange}
+          getLocation={getLocation}
+          setIsError={setIsError}
+        />
+
         <VStack
           spacing={3}
           mt="1em"
@@ -120,100 +131,113 @@ const Home = () => {
             (currentWeather.main.temp > 40 ? styles.burning : "")
           }
         >
-          <Heading fontFamily="Raleway, sans-serif">
-            {currentWeather ? Math.round(currentWeather.main.temp) : "-"}{" "}
-            &#176;C
-          </Heading>
-          <Text fontSize="2em">
-            {currentWeather ? currentWeather.weather[0].description : "-"}
-          </Text>
-          <Flex align={"center"} justify={"center"} gap={"10PX"}>
-            <Text>Today •</Text>
+          {!isError && (
+            <>
+              <Heading fontFamily="Raleway, sans-serif">
+                {currentWeather ? Math.round(currentWeather.main.temp) : "-"}{" "}
+                &#176;C
+              </Heading>
+              <Text fontSize="2em">
+                {currentWeather ? currentWeather.weather[0].description : "-"}
+              </Text>
+              <Flex align={"center"} justify={"center"} gap={"10PX"}>
+                <Text>Today •</Text>
 
-            <Text>{dateBuilder()}</Text>
-          </Flex>
-          <Flex
-            align={"center"}
-            justify={"center"}
-            gap={"10PX"}
-            fontWeight={"bold"}
-          >
-            <CiLocationOn />
-            <Text>{currentWeather ? currentWeather.name : "New delhi"}</Text>
-          </Flex>
+                <Text>{dateBuilder()}</Text>
+              </Flex>
+              <Flex
+                align={"center"}
+                justify={"center"}
+                gap={"10PX"}
+                fontWeight={"bold"}
+              >
+                <CiLocationOn />
+                <Text>
+                  {currentWeather ? currentWeather.name : "New delhi"}
+                </Text>
+              </Flex>
+            </>
+          )}
+          {isError && (
+            <Container>
+              <Heading>Sorry Cant find the place. Try again!</Heading>
+            </Container>
+          )}
         </VStack>
       </Container>
-      <Flex
-        flexDir={["row", "row", "column", "column"]}
-        minH={["100%", "100%", "80vh", "80vh"]}
-        mt={["1em", "1em", "0em", "0em"]}
-        bg="rgba(173, 216, 230, 0.4)"
-        textAlign={"center"}
-        p="2em"
-        borderRadius={"20px"}
-        justify={[
-          "space-between",
-          "space-between",
-          "space-evenly",
-          "space-evenly",
-        ]}
-        align={["center", "center", "", ""]}
-        flexWrap={["wrap", "wrap", "nowrap", "nowrap"]}
-        gap={["20px", "20px", "0px", "0px"]}
-      >
-        <Box>
-          <Divider />
+      {!isError && (
+        <Flex
+          flexDir={["row", "row", "column", "column"]}
+          minH={["100%", "100%", "80vh", "80vh"]}
+          mt={["1em", "1em", "0em", "0em"]}
+          bg="rgba(173, 216, 230, 0.4)"
+          textAlign={"center"}
+          p="2em"
+          borderRadius={"20px"}
+          justify={[
+            "space-between",
+            "space-between",
+            "space-evenly",
+            "space-evenly",
+          ]}
+          align={["center", "center", "", ""]}
+          flexWrap={["wrap", "wrap", "nowrap", "nowrap"]}
+          gap={["20px", "20px", "0px", "0px"]}
+        >
+          <Box>
+            <Divider />
 
-          <Text>
-            Humidity{" "}
-            <span>
-              <Heading>
-                {currentWeather && currentWeather.main.humidity}
-              </Heading>
-            </span>
-            %
-          </Text>
-        </Box>
-        <Box>
-          <Divider />
-          <Text>
-            Visibility
-            <span>
-              <Heading>{currentWeather && currentWeather.visibility}</Heading>
-            </span>
-            miles
-          </Text>
-        </Box>
-        <Box>
-          <Divider />
+            <Text>
+              Humidity{" "}
+              <span>
+                <Heading>
+                  {currentWeather && currentWeather.main.humidity}
+                </Heading>
+              </span>
+              %
+            </Text>
+          </Box>
+          <Box>
+            <Divider />
+            <Text>
+              Visibility
+              <span>
+                <Heading>{currentWeather && currentWeather.visibility}</Heading>
+              </span>
+              miles
+            </Text>
+          </Box>
+          <Box>
+            <Divider />
 
-          <Text>
-            Wind Status{" "}
-            <span>
-              <Heading>
-                {currentWeather &&
-                  Math.round(`${currentWeather.wind.speed}` * 2.237)}
-              </Heading>
-              mph
-            </span>
-          </Text>
-        </Box>
+            <Text>
+              Wind Status{" "}
+              <span>
+                <Heading>
+                  {currentWeather &&
+                    Math.round(`${currentWeather.wind.speed}` * 2.237)}
+                </Heading>
+                mph
+              </span>
+            </Text>
+          </Box>
 
-        <Box>
+          <Box>
+            <Divider />
+            <Text>
+              Air Pressure
+              <span>
+                <Heading>
+                  {currentWeather && currentWeather.main.pressure}
+                </Heading>
+              </span>
+              mb
+            </Text>
+          </Box>
+
           <Divider />
-          <Text>
-            Air Pressure
-            <span>
-              <Heading>
-                {currentWeather && currentWeather.main.pressure}
-              </Heading>
-            </span>
-            mb
-          </Text>
-        </Box>
-
-        <Divider />
-      </Flex>
+        </Flex>
+      )}
     </Flex>
   );
 };
