@@ -36,6 +36,9 @@ const Search = ({ onSearchChange, getLocation }) => {
       className="SearchBox"
       justifyContent={"space-between"}
       alignItems={"center"}
+      bg=" rgba(173, 216, 230, 0.5)"
+      p={["0.5em", "0.5em", "1em", "1em"]}
+      borderRadius={"20px"}
     >
       <InputGroup w={"85%"}>
         <Input
@@ -43,6 +46,7 @@ const Search = ({ onSearchChange, getLocation }) => {
           type="text"
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => handleOnEnter(e)}
+          fontWeight={"bold"}
         ></Input>
         <InputRightElement>
           <Button
@@ -54,7 +58,7 @@ const Search = ({ onSearchChange, getLocation }) => {
           </Button>
         </InputRightElement>
       </InputGroup>
-      <Button onClick={getLocation}>
+      <Button onClick={getLocation} bg={["none", "none", "white", "white"]}>
         <FaLocationCrosshairs />
       </Button>
     </Flex>

@@ -1,11 +1,17 @@
 .Home {
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+
   width: 100%;
   /* background-image: url("../public/haze.jpg"); */
   background-repeat: no-repeat;
   background-size: cover;
   background-color: black;
+}
+.burning {
+  box-shadow: 0 0 10px 5px rgba(255, 87, 34, 0.5);
+  color: #fff;
+}
+.cold {
+  box-shadow: 0 0 10px 5px rgba(254, 254, 254, 0.5);
+  color: black;
 }
