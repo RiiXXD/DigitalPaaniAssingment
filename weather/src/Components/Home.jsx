@@ -5,14 +5,12 @@ import {
   Input,
   InputRightElement,
   Flex,
-  Button,
-  Box,
   Heading,
   Text,
+  VStack,
 } from "@chakra-ui/react";
-import { FaSearchLocation } from "react-icons/fa";
-import { FaLocationCrosshairs } from "react-icons/fa6";
 import { CiLocationOn } from "react-icons/ci";
+import Search from "./Search";
 const Home = () => {
   const dateBuilder = () => {
     const today = new Date();
@@ -23,27 +21,15 @@ const Home = () => {
     });
   };
   return (
-    <Container w="90%" minH="70vh" p="2em">
-      <Flex
-        width={"100%"}
-        className="SearchBox"
-        justifyContent={"space-between"}
-        alignItems={"center"}
+    <Container w="90%" minH="70vh" p="2em" bg="purple.100">
+      <Search />
+      <VStack
+        spacing={3}
+        mt="1em"
+        bg="rgba(173, 216, 230, 0.4)"
+        textAlign={"center"}
+        p="2em"
       >
-        <InputGroup>
-          <Input
-            placeholder="Search for city,state,country"
-            type="text"
-          ></Input>
-          <InputRightElement>
-            <FaSearchLocation />
-          </InputRightElement>
-        </InputGroup>
-        <Button>
-          <FaLocationCrosshairs />
-        </Button>
-      </Flex>
-      <Box mt="1em" bg="rgba(173, 216, 230, 0.1)" textAlign={"center"} p="2em">
         <Heading>34 &#176;</Heading>
         <Text>Haze</Text>
         <Flex align={"center"} justify={"center"} gap={"10PX"}>
@@ -55,7 +41,7 @@ const Home = () => {
           <CiLocationOn />
           <Text>New Delhi</Text>
         </Flex>
-      </Box>
+      </VStack>
     </Container>
   );
 };
